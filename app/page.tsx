@@ -14,7 +14,7 @@ export default function HomePage() {
           Analisador de Dados Binance
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Ferramentas poderosas para backtesting e extração de dados históricos de criptoativos. Escolha uma ferramenta para começar.
+          Ferramentas poderosas para backtesting e extração de dados históricos. Escolha uma ferramenta para começar.
         </p>
       </div>
 
@@ -28,7 +28,7 @@ export default function HomePage() {
                 <div className="bg-secondary p-3 rounded-lg">
                   <BarChart className="h-6 w-6 text-secondary-foreground" />
                 </div>
-                <CardTitle className="text-xl">Extrator de Dados Genérico</CardTitle>
+                <CardTitle className="text-xl">Extrator de Dados</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -51,7 +51,7 @@ export default function HomePage() {
                 <div className="bg-secondary p-3 rounded-lg">
                   <Zap className="h-6 w-6 text-secondary-foreground" />
                 </div>
-                <CardTitle className="text-xl">Análise da Técnica de Gatilho</CardTitle>
+                <CardTitle className="text-xl">Análise da Técnica 4 e 9</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
