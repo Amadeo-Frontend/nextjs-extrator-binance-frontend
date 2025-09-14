@@ -45,7 +45,7 @@ export function AssetCombobox({ value, onChange }: AssetComboboxProps) {
           label: asset,
         }));
         setAssets(formattedAssets);
-      } catch (error) {
+      } catch {
         toast.error("Erro de Rede", {
           description: "Não foi possível carregar a lista de ativos da Binance.",
         });
