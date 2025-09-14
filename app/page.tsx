@@ -27,12 +27,6 @@ export default function HomePage() {
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
           Ferramentas poderosas para backtesting e extração de dados históricos de criptoativos. Escolha uma ferramenta para começar.
         </p>
-        
-        {/* ### BOTÃO ADICIONADO AQUI ### */}
-        {/* Este é o link para a sua nova página /sobre */}
-        <Button variant="link" asChild className="mt-2 text-base">
-          <Link href="/sobre">Como funciona a técnica 4 e 9?</Link>
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
