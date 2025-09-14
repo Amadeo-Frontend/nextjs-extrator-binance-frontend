@@ -11,7 +11,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Analisador de Dados Binance",
+  title: "Analisador de Dados",
   description: "Ferramentas para análise de dados de criptoativos.",
 };
 
