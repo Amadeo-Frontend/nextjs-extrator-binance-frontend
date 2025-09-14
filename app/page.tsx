@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { ArrowRight, BarChart, Zap } from 'lucide-react';
 
 // Importa o componente do seletor de tema que criamos
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function HomePage() {
   return (

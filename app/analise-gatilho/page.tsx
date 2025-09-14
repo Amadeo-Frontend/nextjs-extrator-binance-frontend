@@ -1,4 +1,4 @@
-// frontend/app/analise-gatilho/page.tsx (CÓDIGO COMPLETO E CORRIGIDO COM SONNER)
+// frontend/app/analise-gatilho/page.tsx (CÓDIGO COMPLETO E CORRIGIDO)
 
 'use client';
 
@@ -6,25 +6,21 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 import ClipLoader from "react-spinners/ClipLoader";
-import { toast } from "sonner"; // A importação correta para as notificações
+import { toast } from "sonner";
 
-// Importando os componentes da shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker"; // Nosso componente de data customizado
+import { DatePicker } from "@/components/ui/date-picker";
 
 export default function AnaliseGatilhoPage() {
-  // Estados para controlar os inputs do formulário
   const [asset, setAsset] = useState('BTCUSDT');
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [isLoading, setIsLoading] = useState(false);
-  // A linha 'const { toast } = useToast()' foi removida, pois não é necessária com o 'sonner'.
 
   const handleAnalyse = async () => {
-    // 1. Validação dos inputs usando 'sonner'
     if (!startDate || !endDate) {
       toast.error("Campos obrigatórios", {
         description: "Por favor, selecione a data de início e a data de fim.",
@@ -41,28 +37,26 @@ export default function AnaliseGatilhoPage() {
     setIsLoading(true);
 
     try {
-      // 2. Chamada para o novo endpoint da API
-      // Lembre-se de usar a URL correta do seu back-end no Render
-      const apiUrl = 'https://py-extrator-binance-backend.onrender.com/analise-tecnica-gatilho/';
+      // ### MUDANÇA IMPORTANTE AQUI ###
+      // A URL da API agora é lida da variável de ambiente.
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/analise-tecnica-gatilho/`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           assets: [asset],
-          intervals: ['1m'], // A técnica é fixa em M1
-          start_date: startDate.toISOString( ).split('T')[0],
+          intervals: ['1m'],
+          start_date: startDate.toISOString().split('T')[0],
           end_date: endDate.toISOString().split('T')[0],
         }),
       });
 
-      // 3. Tratamento da resposta da API
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Ocorreu um erro ao realizar a análise.');
       }
 
-      // 4. Lógica para forçar o download do arquivo .zip
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -93,7 +87,7 @@ export default function AnaliseGatilhoPage() {
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-2xl">Análise de Técnica de Gatilho</CardTitle>
-          <CardDescription>Teste a estratégia de gatilhos em minutos-chave com entrada após um LOSS.</CardDescription>
+          <CardDescription>Teste a estratégia de gatilhos em minutos-chave para todas as ocorrências.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">

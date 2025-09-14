@@ -8,22 +8,19 @@ import { Download } from 'lucide-react';
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "sonner";
 
-// Importando componentes da shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input"; // Usaremos Input de texto aqui
+import { Input } from "@/components/ui/input";
 
 export default function ExtratorGeralPage() {
-  // Estados para os inputs de texto
   const [assets, setAssets] = useState('BTCUSDT, ETHUSDT');
   const [intervals, setIntervals] = useState('1h, 4h');
   const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]); // Hoje
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDownload = async () => {
-    // Validação dos inputs
     const assetList = assets.split(',').map(a => a.trim()).filter(a => a);
     const intervalList = intervals.split(',').map(i => i.trim()).filter(i => i);
 
@@ -35,8 +32,9 @@ export default function ExtratorGeralPage() {
     setIsLoading(true);
 
     try {
-      // <<< PONTO CRÍTICO: USANDO O ENDPOINT CORRETO >>>
-      const apiUrl = 'https://py-extrator-binance-backend.onrender.com/download-data/';
+      // ### MUDANÇA IMPORTANTE AQUI ###
+      // A URL da API agora é lida da variável de ambiente.
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/download-data/`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -46,7 +44,7 @@ export default function ExtratorGeralPage() {
           intervals: intervalList,
           start_date: startDate,
           end_date: endDate,
-        } ),
+        }),
       });
 
       if (!response.ok) {
