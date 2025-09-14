@@ -29,7 +29,7 @@ export default function HomePage() {
 
     try {
       // URL do nosso back-end
-      const apiUrl = 'http://127.0.0.1:8000/download-data/';
+      const apiUrl = 'https://py-extrator-binance-backend.onrender.com';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
