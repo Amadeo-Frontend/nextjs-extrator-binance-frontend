@@ -1,4 +1,4 @@
-// frontend/app/analise-gatilho/page.tsx (VERSÃO CORRIGIDA)
+// frontend/app/analise-gatilho/page.tsx (VERSÃO COM INPUT DE DATA SIMPLES)
 
 'use client';
 
@@ -11,13 +11,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/ui/date-picker";
+// --- 1. REMOVIDO O DATEPICKER, ADICIONADO O INPUT ---
+import { Input } from "@/components/ui/input"; 
 import { AssetCombobox } from "@/components/ui/asset-combobox";
 
 export default function AnaliseGatilhoPage() {
   const [asset, setAsset] = useState('BTCUSDT');
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  
+  // --- 2. ESTADOS DE DATA VOLTAM A SER STRINGS ---
+  const [startDate, setStartDate] = useState<string>('2024-01-01');
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAnalyse = async () => {
@@ -27,6 +31,7 @@ export default function AnaliseGatilhoPage() {
       });
       return;
     }
+    // A validação de data agora compara strings, o que funciona bem para o formato YYYY-MM-DD
     if (startDate > endDate) {
       toast.error("Período inválido", {
         description: "A data de início não pode ser posterior à data de fim.",
@@ -37,7 +42,6 @@ export default function AnaliseGatilhoPage() {
     setIsLoading(true);
 
     try {
-      // ### CORREÇÃO IMPORTANTE AQUI ###
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/binance/analise-tecnica-gatilho/`;
       
       const response = await fetch(apiUrl, {
@@ -46,8 +50,9 @@ export default function AnaliseGatilhoPage() {
         body: JSON.stringify({
           assets: [asset],
           intervals: ['1m'],
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
+          // Não precisa mais de conversão, pois os estados já são strings
+          start_date: startDate,
+          end_date: endDate,
         }),
       });
 
@@ -60,7 +65,7 @@ export default function AnaliseGatilhoPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `analise_gatilho_${asset}_${startDate.toISOString().split('T')[0]}.zip`;
+      a.download = `analise_gatilho_${asset}_${startDate}.zip`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -70,7 +75,7 @@ export default function AnaliseGatilhoPage() {
         description: "O download do seu relatório foi iniciado.",
       });
 
-    } catch (err: unknown) { // CORREÇÃO DE TIPO
+    } catch (err: unknown) {
       if (err instanceof Error) {
         toast.error("Erro na Análise", { description: err.message });
       } else {
@@ -95,14 +100,25 @@ export default function AnaliseGatilhoPage() {
             <AssetCombobox value={asset} onChange={setAsset} />
           </div>
           
+          {/* --- 3. SUBSTITUÍDO PELO INPUT DE DATA SIMPLES --- */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Data de Início</Label>
-              <DatePicker date={startDate} setDate={setStartDate} placeholder="Data de início" />
+              <Label htmlFor="start-date">Data de Início</Label>
+              <Input 
+                id="start-date" 
+                type="date" 
+                value={startDate} 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)} 
+              />
             </div>
             <div className="space-y-2">
-              <Label>Data de Fim</Label>
-              <DatePicker date={endDate} setDate={setEndDate} placeholder="Data de fim" />
+              <Label htmlFor="end-date">Data de Fim</Label>
+              <Input 
+                id="end-date" 
+                type="date" 
+                value={endDate} 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)} 
+              />
             </div>
           </div>
 
