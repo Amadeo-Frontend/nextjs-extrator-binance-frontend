@@ -1,5 +1,3 @@
-// frontend/app/page.tsx (VERSÃO CORRIGIDA SEM OS CARDS DO TRADINGVIEW)
-
 'use client';
 
 import Link from 'next/link';
