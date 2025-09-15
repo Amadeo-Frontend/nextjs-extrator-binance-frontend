@@ -1,14 +1,31 @@
+// frontend/components/ui/TradingViewCard.tsx (VERSÃO CORRIGIDA PARA ESLINT)
+
 'use client';
 
 import { useState } from 'react';
+import ClipLoader from 'react-spinners/ClipLoader';
 
-type Summary = {
+// --- TIPAGEM CORRIGIDA E MAIS ESPECÍFICA ---
+type AnalysisCompute = {
+  [key: string]: string;
+};
+
+type SummaryData = {
   symbol: string;
   exchange: string;
   time: string;
-  summary: { RECOMMENDATION: string; BUY?: number; SELL?: number; NEUTRAL?: number };
-  oscillators: any;
-  moving_averages: any;
+  summary: { 
+    RECOMMENDATION: string; 
+    BUY?: number; 
+    SELL?: number; 
+    NEUTRAL?: number 
+  };
+  oscillators: {
+    COMPUTE: AnalysisCompute;
+  };
+  moving_averages: {
+    COMPUTE: AnalysisCompute;
+  };
   indicators: Record<string, number>;
 };
 
@@ -16,20 +33,22 @@ export default function TradingViewCard() {
   const [query, setQuery] = useState('EURUSD');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<Summary | null>(null);
+  const [data, setData] = useState<SummaryData | null>(null);
   const [matches, setMatches] = useState<string[]>([]);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+  // Corrigido para usar a variável de ambiente correta que definimos
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-  async function search() {
+  async function search( ) {
     setError(null);
     setLoading(true);
     try {
       const r = await fetch(`${API_BASE}/tradingview/forex/search?q=${encodeURIComponent(query)}`);
       const j = await r.json();
       setMatches(j.matches || []);
-    } catch (e:any) {
+    } catch (e: unknown) { // <<< CORREÇÃO APLICADA AQUI
       setError('Falha ao buscar pares');
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -44,11 +63,19 @@ export default function TradingViewCard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol }),
       });
-      if (!r.ok) throw new Error(await r.text());
+      if (!r.ok) {
+        const errorText = await r.text();
+        throw new Error(errorText || 'A resposta da API não foi bem-sucedida.');
+      }
       const j = await r.json();
       setData(j);
-    } catch (e:any) {
-      setError('Não foi possível obter o sumário do TradingView. Verifique o backend.');
+    } catch (e: unknown) { // <<< CORREÇÃO APLICADA AQUI
+      if (e instanceof Error) {
+        setError(`Não foi possível obter o sumário: ${e.message}`);
+      } else {
+        setError('Não foi possível obter o sumário do TradingView. Verifique o backend.');
+      }
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -61,16 +88,16 @@ export default function TradingViewCard() {
       <div className="mt-3 flex gap-2">
         <input
           value={query}
-          onChange={(e)=>setQuery(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value.toUpperCase())} // <<< CORREÇÃO APLICADA AQUI
           placeholder="EURUSD"
-          className="border rounded-lg px-3 py-2 w-48"
+          className="border rounded-lg px-3 py-2 w-48 bg-transparent" // Adicionado bg-transparent para consistência
         />
         <button
           onClick={search}
           disabled={loading}
           className="px-3 py-2 rounded-lg bg-black text-white disabled:opacity-60"
         >
-          {loading ? 'Buscando...' : 'Buscar pares'}
+          {loading && !data ? 'Buscando...' : 'Buscar pares'}
         </button>
       </div>
 
@@ -81,10 +108,11 @@ export default function TradingViewCard() {
             {matches.map((m) => (
               <button
                 key={m}
-                onClick={()=>getSummary(m)}
-                className="px-2 py-1 text-sm border rounded-md hover:bg-gray-50"
+                onClick={() => getSummary(m)}
+                disabled={loading}
+                className="px-2 py-1 text-sm border rounded-md hover:bg-gray-50 disabled:opacity-50"
               >
-                {m}
+                {loading && query === m ? <ClipLoader size={12} /> : m}
               </button>
             ))}
           </div>
