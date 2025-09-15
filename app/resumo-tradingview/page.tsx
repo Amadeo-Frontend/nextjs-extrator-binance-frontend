@@ -1,4 +1,4 @@
-// frontend/app/resumo-tradingview/page.tsx (VERSÃO CORRIGIDA PARA ESLINT)
+// frontend/app/resumo-tradingview/page.tsx (VERSÃO FINAL E CORRIGIDA)
 
 'use client';
 
@@ -50,6 +50,7 @@ export default function ResumoTradingViewPage() {
     setAnalysis(null); // Limpa a análise anterior
 
     try {
+      // A URL da API já está correta, pois o prefixo /tradingview já estava no nome
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/tradingview/forex/summary`;
       
       const response = await fetch(apiUrl, {
@@ -72,7 +73,7 @@ export default function ResumoTradingViewPage() {
         description: `Resumo para ${result.symbol} carregado com sucesso.`,
       });
 
-    } catch (err: unknown) { // CORREÇÃO APLICADA AQUI
+    } catch (err: unknown) { // CORREÇÃO DE TIPO JÁ APLICADA
       if (err instanceof Error) {
         toast.error("Erro na Análise", { description: err.message });
       } else {
@@ -94,19 +95,19 @@ export default function ResumoTradingViewPage() {
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Resumo de Análise Técnica (TradingView)</CardTitle>
+          <CardTitle className="text-2xl">Resumo de Análise Técnica (Forex)</CardTitle>
           <CardDescription>Obtenha a recomendação de Compra/Venda baseada nos indicadores técnicos do TradingView para pares de Forex.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="symbol">Símbolo (ex: EURUSD)</Label>
-              {/* CORREÇÃO APLICADA AQUI */}
+              {/* CORREÇÃO DE TIPO JÁ APLICADA */}
               <Input id="symbol" value={symbol} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSymbol(e.target.value.toUpperCase())} placeholder="EURUSD" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="exchange">Corretora (Opcional)</Label>
-              {/* CORREÇÃO APLICADA AQUI */}
+              {/* CORREÇÃO DE TIPO JÁ APLICADA */}
               <Input id="exchange" value={exchange} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setExchange(e.target.value)} placeholder="FX_IDC" />
             </div>
           </div>

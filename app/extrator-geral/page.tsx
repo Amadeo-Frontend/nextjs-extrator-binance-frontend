@@ -1,4 +1,4 @@
-// frontend/app/extrator-geral/page.tsx (CÓDIGO COMPLETO E CORRIGIDO)
+// frontend/app/extrator-geral/page.tsx (VERSÃO CORRIGIDA)
 
 'use client';
 
@@ -32,9 +32,8 @@ export default function ExtratorGeralPage() {
     setIsLoading(true);
 
     try {
-      // ### MUDANÇA IMPORTANTE AQUI ###
-      // A URL da API agora é lida da variável de ambiente.
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/download-data/`;
+      // ### CORREÇÃO IMPORTANTE AQUI ###
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/binance/download-data/`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -61,7 +60,7 @@ export default function ExtratorGeralPage() {
       let filename = 'dados_binance.zip';
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch && filenameMatch.length > 1) filename = filenameMatch[1];
+        if (filenameMatch?.[1]) filename = filenameMatch[1];
       }
       
       a.download = filename;
@@ -74,7 +73,7 @@ export default function ExtratorGeralPage() {
         description: "Seu arquivo ZIP com os dados está sendo baixado.",
       });
 
-    } catch (err) {
+    } catch (err: unknown) { // CORREÇÃO DE TIPO
       if (err instanceof Error) {
         toast.error("Erro ao buscar dados", { description: err.message });
       } else {
@@ -89,26 +88,26 @@ export default function ExtratorGeralPage() {
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Extrator de Dados Históricos</CardTitle>
+          <CardTitle className="text-2xl">Extrator de Dados Históricos (Binance)</CardTitle>
           <CardDescription>Baixe dados de criptoativos da Binance em formato CSV.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="assets">Ativos (separados por vírgula)</Label>
-            <Input id="assets" value={assets} onChange={(e) => setAssets(e.target.value)} placeholder="Ex: BTCUSDT, ETHUSDT" />
+            <Input id="assets" value={assets} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssets(e.target.value)} placeholder="Ex: BTCUSDT, ETHUSDT" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="intervals">Timeframes (separados por vírgula)</Label>
-            <Input id="intervals" value={intervals} onChange={(e) => setIntervals(e.target.value)} placeholder="Ex: 1m, 5m, 1h" />
+            <Input id="intervals" value={intervals} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIntervals(e.target.value)} placeholder="Ex: 1m, 5m, 1h" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Data de Início</Label>
-              <Input id="start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              <Input id="start-date" type="date" value={startDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="end-date">Data de Fim</Label>
-              <Input id="end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <Input id="end-date" type="date" value={endDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)} />
             </div>
           </div>
           <Button onClick={handleDownload} disabled={isLoading} className="w-full">

@@ -1,4 +1,4 @@
-// frontend/components/ui/asset-combobox.tsx
+// frontend/components/ui/asset-combobox.tsx (VERSÃO CORRIGIDA)
 
 "use client"
 
@@ -22,6 +22,11 @@ import {
 } from "@/components/ui/popover"
 import { toast } from "sonner"
 
+// Tipagem para a resposta da API
+interface AssetApiResponse {
+  assets: string[];
+}
+
 interface AssetComboboxProps {
   value: string;
   onChange: (value: string) => void;
@@ -35,24 +40,36 @@ export function AssetCombobox({ value, onChange }: AssetComboboxProps) {
   React.useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/available-assets/`;
+        // ### CORREÇÃO IMPORTANTE DA URL AQUI ###
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/binance/available-assets/`;
         const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Falha ao buscar ativos");
         
-        const data = await response.json();
-        const formattedAssets = data.assets.map((asset: string) => ({
-          value: asset.toLowerCase(),
-          label: asset,
-        }));
-        setAssets(formattedAssets);
-      } catch {
+        if (!response.ok) {
+          throw new Error("Falha ao buscar ativos da API.");
+        }
+        
+        const data: AssetApiResponse = await response.json();
+        
+        // Garante que 'data.assets' é um array antes de mapear
+        if (Array.isArray(data.assets)) {
+          const formattedAssets = data.assets.map((asset: string) => ({
+            value: asset.toLowerCase(),
+            label: asset,
+          }));
+          setAssets(formattedAssets);
+        } else {
+          throw new Error("Formato de dados de ativos inesperado.");
+        }
+
+      } catch (err: unknown) { // CORREÇÃO DE TIPO AQUI
+        console.error(err); // Loga o erro no console para depuração
         toast.error("Erro de Rede", {
           description: "Não foi possível carregar a lista de ativos da Binance.",
         });
       }
     };
     fetchAssets();
-  }, []);
+  }, []); // O array vazio garante que isso rode apenas uma vez
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -80,7 +97,9 @@ export function AssetCombobox({ value, onChange }: AssetComboboxProps) {
                   key={asset.value}
                   value={asset.value}
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : asset.label)
+                    // Encontra o label correto baseado no valor selecionado
+                    const selectedAsset = assets.find(a => a.value === currentValue);
+                    onChange(selectedAsset ? selectedAsset.label : "");
                     setOpen(false)
                   }}
                 >

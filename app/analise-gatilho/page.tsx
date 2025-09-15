@@ -1,4 +1,4 @@
-// frontend/app/analise-gatilho/page.tsx (CÓDIGO COMPLETO COM A SUBSTITUIÇÃO)
+// frontend/app/analise-gatilho/page.tsx (VERSÃO CORRIGIDA)
 
 'use client';
 
@@ -8,24 +8,19 @@ import { Download } from 'lucide-react';
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "sonner";
 
-// Componentes da shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
-
-// Importa o novo componente Combobox que busca os ativos
 import { AssetCombobox } from "@/components/ui/asset-combobox";
 
 export default function AnaliseGatilhoPage() {
-  // Estados para controlar os inputs do formulário
   const [asset, setAsset] = useState('BTCUSDT');
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAnalyse = async () => {
-    // Validação dos inputs
     if (!asset || !startDate || !endDate) {
       toast.error("Campos obrigatórios", {
         description: "Por favor, selecione o ativo e as datas de início e fim.",
@@ -42,8 +37,8 @@ export default function AnaliseGatilhoPage() {
     setIsLoading(true);
 
     try {
-      // A URL da API é lida da variável de ambiente
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/analise-tecnica-gatilho/`;
+      // ### CORREÇÃO IMPORTANTE AQUI ###
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/binance/analise-tecnica-gatilho/`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -61,7 +56,6 @@ export default function AnaliseGatilhoPage() {
         throw new Error(errorData.detail || 'Ocorreu um erro ao realizar a análise.');
       }
 
-      // Lógica para forçar o download do arquivo .zip
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -76,7 +70,7 @@ export default function AnaliseGatilhoPage() {
         description: "O download do seu relatório foi iniciado.",
       });
 
-    } catch (err) {
+    } catch (err: unknown) { // CORREÇÃO DE TIPO
       if (err instanceof Error) {
         toast.error("Erro na Análise", { description: err.message });
       } else {
@@ -91,12 +85,11 @@ export default function AnaliseGatilhoPage() {
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Análise de Técnica de 4 e 9</CardTitle>
+          <CardTitle className="text-2xl">Análise de Técnica de 4 e 9 (Binance)</CardTitle>
           <CardDescription>Teste a estratégia de gatilhos em minutos-chave para todas as ocorrências.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           
-          {/* O bloco <Select> foi substituído por este bloco com o <AssetCombobox> */}
           <div className="space-y-2">
             <Label htmlFor="asset">Ativo</Label>
             <AssetCombobox value={asset} onChange={setAsset} />

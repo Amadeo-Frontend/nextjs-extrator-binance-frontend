@@ -1,17 +1,17 @@
+// frontend/app/page.tsx (VERSÃO CORRIGIDA E LIMPA)
+
 'use client';
 
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { ArrowRight, CandlestickChart, FileSearch } from 'lucide-react'; // Adicionei um novo ícone
+import { ArrowRight, CandlestickChart, BrainCircuit } from 'lucide-react';
 
-// Importa o componente do seletor de tema
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function HomePage() {
   return (
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
       
-      {/* Botão de troca de tema posicionado no canto superior direito */}
       <div className="absolute top-4 right-4 md:top-6 md:right-6">
         <ThemeToggle />
       </div>
@@ -28,7 +28,7 @@ export default function HomePage() {
       {/* Grid principal de cards - AGORA COM 3 CARDS FUNCIONAIS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
         
-        {/* Card 1: Extrator de Dados da Binance (Funcional) */}
+        {/* Card 1: Extrator de Dados da Binance */}
         <Link href="/extrator-geral" className="group">
           <Card className="h-full hover:border-primary transition-all duration-300 hover:shadow-lg">
             <CardHeader>
@@ -51,7 +51,7 @@ export default function HomePage() {
           </Card>
         </Link>
 
-        {/* Card 2: Análise da Técnica 4 e 9 (Funcional) */}
+        {/* Card 2: Análise da Técnica 4 e 9 */}
         <Link href="/analise-gatilho" className="group">
           <Card className="h-full hover:border-primary transition-all duration-300 hover:shadow-lg">
             <CardHeader>
@@ -74,14 +74,13 @@ export default function HomePage() {
           </Card>
         </Link>
 
-        {/* Card 3: Resumo de Análise do TradingView (Funcional) */}
-        {/* Você precisará criar esta página, vou te ajudar em seguida */}
+        {/* Card 3: Resumo de Análise do TradingView */}
         <Link href="/resumo-tradingview" className="group">
           <Card className="h-full hover:border-primary transition-all duration-300 hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center gap-4">
                 <div className="bg-secondary p-3 rounded-lg">
-                  <FileSearch className="h-6 w-6 text-secondary-foreground" />
+                  <BrainCircuit className="h-6 w-6 text-secondary-foreground" />
                 </div>
                 <CardTitle className="text-xl">Resumo de Análise (Forex)</CardTitle>
               </div>
