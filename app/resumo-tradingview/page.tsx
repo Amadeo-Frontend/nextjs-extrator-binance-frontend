@@ -1,10 +1,10 @@
-// frontend/app/resumo-tradingview/page.tsx
+// frontend/app/resumo-tradingview/page.tsx (VERSÃO CORRIGIDA PARA ESLINT)
 
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FileSearch, BrainCircuit } from 'lucide-react';
+import { BrainCircuit } from 'lucide-react';
 import ClipLoader from "react-spinners/ClipLoader";
 import { toast } from "sonner";
 
@@ -72,7 +72,7 @@ export default function ResumoTradingViewPage() {
         description: `Resumo para ${result.symbol} carregado com sucesso.`,
       });
 
-    } catch (err) {
+    } catch (err: unknown) { // CORREÇÃO APLICADA AQUI
       if (err instanceof Error) {
         toast.error("Erro na Análise", { description: err.message });
       } else {
@@ -101,11 +101,13 @@ export default function ResumoTradingViewPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="symbol">Símbolo (ex: EURUSD)</Label>
-              <Input id="symbol" value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="EURUSD" />
+              {/* CORREÇÃO APLICADA AQUI */}
+              <Input id="symbol" value={symbol} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSymbol(e.target.value.toUpperCase())} placeholder="EURUSD" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="exchange">Corretora (Opcional)</Label>
-              <Input id="exchange" value={exchange} onChange={(e) => setExchange(e.target.value)} placeholder="FX_IDC" />
+              {/* CORREÇÃO APLICADA AQUI */}
+              <Input id="exchange" value={exchange} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setExchange(e.target.value)} placeholder="FX_IDC" />
             </div>
           </div>
 
