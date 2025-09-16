@@ -1,4 +1,4 @@
-// frontend/app/analise-gatilho-tradingview/page.tsx
+// frontend/app/analise-4e9-forex/page.tsx (VERSÃO COM INPUT DE DATA SIMPLES)
 
 'use client';
 
@@ -12,18 +12,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+// O DatePicker não é mais necessário aqui
+// import { DatePicker } from "@/components/ui/date-picker";
 
-export default function AnaliseGatilhoTradingViewPage() {
-  const [symbol, setSymbol] = useState('EURUSD');
-  const [exchange, setExchange] = useState('FX_IDC');
-  const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+export default function Analise4e9ForexPage() {
+  const [asset, setAsset] = useState('EURUSD');
+  // Os estados de data agora são strings
+  const [startDate, setStartDate] = useState<string>('2024-01-01');
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAnalyse = async () => {
-    if (!symbol || !exchange || !startDate || !endDate) {
+    if (!asset || !startDate || !endDate) {
       toast.error("Campos obrigatórios", {
-        description: "Por favor, preencha todos os campos.",
+        description: "Por favor, selecione o ativo e as datas de início e fim.",
+      });
+      return;
+    }
+    if (startDate > endDate) {
+      toast.error("Período inválido", {
+        description: "A data de início não pode ser posterior à data de fim.",
       });
       return;
     }
@@ -31,15 +39,14 @@ export default function AnaliseGatilhoTradingViewPage() {
     setIsLoading(true);
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/tradingview/analise-tecnica-gatilho/`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/alphavantage/analise-tecnica-gatilho/`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          symbol: symbol.toUpperCase(),
-          exchange,
-          interval: 'M1', // A técnica é fixa em M1
+          assets: [asset],
+          intervals: ['1m'],
           start_date: startDate,
           end_date: endDate,
         }),
@@ -49,24 +56,14 @@ export default function AnaliseGatilhoTradingViewPage() {
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Ocorreu um erro ao realizar a análise.');
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tv_analise_gatilho_${symbol}_${startDate}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
+      
       toast.success("Análise Concluída!", {
         description: "O download do seu relatório foi iniciado.",
       });
 
-    } catch (err) {
+    } catch (err: unknown) {
       if (err instanceof Error) {
-        toast.error("Erro na Análise", { description: err.message });
+        toast.error("Funcionalidade em Desenvolvimento", { description: err.message });
       } else {
         toast.error("Erro Desconhecido", { description: "Ocorreu um problema inesperado." });
       }
@@ -79,22 +76,20 @@ export default function AnaliseGatilhoTradingViewPage() {
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Análise 4 e 9 (TradingView)</CardTitle>
-          <CardDescription>Teste a estratégia de gatilho com dados de Forex do TradingView.</CardDescription>
+          <CardTitle className="text-2xl">Análise Técnica 4 e 9 (Forex)</CardTitle>
+          <CardDescription>
+            Teste a estratégia de gatilhos para pares de moedas. 
+            <span className="font-semibold text-destructive block mt-2">Nota: Esta funcionalidade requer dados intraday que não estão facilmente disponíveis na API gratuita.</span>
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="symbol">Símbolo</Label>
-              <Input id="symbol" value={symbol} onChange={(e) => setSymbol(e.target.value)} placeholder="Ex: EURUSD" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="exchange">Corretora (Exchange)</Label>
-              <Input id="exchange" value={exchange} onChange={(e) => setExchange(e.target.value)} placeholder="Ex: FX_IDC" />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="asset">Par de Moedas (ex: EURUSD)</Label>
+            <Input id="asset" value={asset} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAsset(e.target.value.toUpperCase())} />
           </div>
           
+          {/* Componente de data simples */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Data de Início</Label>
