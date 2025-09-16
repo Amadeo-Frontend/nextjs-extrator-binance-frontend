@@ -1,8 +1,8 @@
-// frontend/app/extrator-geral/page.tsx (VERSÃO CORRIGIDA)
+// frontend/app/extrator-geral/page.tsx (VERSÃO FINAL CORRIGIDA)
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Importa useEffect
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 import ClipLoader from "react-spinners/ClipLoader";
@@ -16,66 +16,44 @@ import { Input } from "@/components/ui/input";
 export default function ExtratorGeralPage() {
   const [assets, setAssets] = useState('BTCUSDT, ETHUSDT');
   const [intervals, setIntervals] = useState('1h, 4h');
-  const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  // Inicia as datas como strings vazias
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Define os valores iniciais das datas apenas no lado do cliente
+  useEffect(() => {
+    setStartDate('2024-01-01');
+    setEndDate(new Date().toISOString().split('T')[0]);
+  }, []);
+
   const handleDownload = async () => {
+    // ... (lógica da função continua a mesma)
     const assetList = assets.split(',').map(a => a.trim()).filter(a => a);
     const intervalList = intervals.split(',').map(i => i.trim()).filter(i => i);
-
     if (assetList.length === 0 || intervalList.length === 0 || !startDate || !endDate) {
       toast.error('Por favor, preencha todos os campos corretamente.');
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // ### CORREÇÃO IMPORTANTE AQUI ###
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/binance/download-data/`;
-      
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assets: assetList,
-          intervals: intervalList,
-          start_date: startDate,
-          end_date: endDate,
-        }),
+        body: JSON.stringify({ assets: assetList, intervals: intervalList, start_date: startDate, end_date: endDate }),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Ocorreu um erro ao buscar os dados.');
+        throw new Error(errorData.detail || 'Ocorreu um erro ao iniciar a extração.');
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      
-      const contentDisposition = response.headers.get('content-disposition');
-      let filename = 'dados_binance.zip';
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch?.[1]) filename = filenameMatch[1];
-      }
-      
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Download iniciado!", {
-        description: "Seu arquivo ZIP com os dados está sendo baixado.",
+      toast.success("Extração Iniciada!", {
+        description: `A extração para ${assetList.length} ativo(s) começou. Verifique a Central de Relatórios em breve.`,
+        action: { label: "Ver Relatórios", onClick: () => window.location.href = '/relatorios' },
       });
-
-    } catch (err: unknown) { // CORREÇÃO DE TIPO
+    } catch (err: unknown) {
       if (err instanceof Error) {
-        toast.error("Erro ao buscar dados", { description: err.message });
+        toast.error("Erro ao Iniciar", { description: err.message });
       } else {
         toast.error("Erro Desconhecido", { description: "Ocorreu um problema inesperado." });
       }
@@ -88,8 +66,8 @@ export default function ExtratorGeralPage() {
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Extrator de Dados Históricos (Binance)</CardTitle>
-          <CardDescription>Baixe dados de criptoativos da Binance em formato CSV.</CardDescription>
+          <CardTitle className="text-2xl">Extrator de Dados (Binance)</CardTitle>
+          <CardDescription>Inicia a geração de um arquivo .zip com dados de criptoativos da Binance.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -112,15 +90,9 @@ export default function ExtratorGeralPage() {
           </div>
           <Button onClick={handleDownload} disabled={isLoading} className="w-full">
             {isLoading ? (
-              <>
-                <ClipLoader color={"hsl(var(--primary-foreground))"} size={20} className="mr-2" />
-                Gerando...
-              </>
+              <><ClipLoader color={"hsl(var(--primary-foreground))"} size={20} className="mr-2" />Iniciando...</>
             ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                Gerar e Baixar Arquivos
-              </>
+              <><Download className="mr-2 h-4 w-4" />Iniciar Geração de Arquivo</>
             )}
           </Button>
         </CardContent>

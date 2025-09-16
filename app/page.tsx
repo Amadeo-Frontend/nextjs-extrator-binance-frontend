@@ -1,4 +1,4 @@
-// frontend/app/page.tsx (VERSÃO FINAL COM MARGEM NA TAG)
+// frontend/app/page.tsx (VERSÃO FINAL COM O CARD DE RELATÓRIOS)
 
 "use client";
 
@@ -17,6 +17,7 @@ import {
   Globe,
   Zap,
   Construction,
+  FileText, // 1. Importe o novo ícone
 } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -32,8 +33,6 @@ export default function HomePage() {
 
   // Componente para a tag da fonte de dados
   const SourceBadge = ({ source }: { source: string }) => (
-    // ### CORREÇÃO APLICADA AQUI ###
-    // Adicionada a classe mb-1 para dar uma pequena margem inferior
     <div className="absolute top-2 right-2 bg-secondary/80 text-secondary-foreground/80 text-xs font-semibold px-2 py-1 rounded-full mb-1">
       {source}
     </div>
@@ -80,6 +79,27 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full max-w-screen-xl">
+        
+        {/* 2. CARD DA CENTRAL DE RELATÓRIOS ADICIONADO AQUI */}
+        <Link href="/relatorios" className="group col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4">
+          <Card className="relative h-full flex flex-col justify-between bg-primary/5 hover:border-primary transition-all duration-300 hover:shadow-lg">
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl text-primary">Central de Relatórios</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Acesse e baixe todos os relatórios e extrações de dados gerados em segundo plano.
+              </CardDescription>
+              <AccessLink />
+            </CardContent>
+          </Card>
+        </Link>
+
         {/* --- BINANCE (CRIPTO) --- */}
         <Link href="/extrator-geral" className="group">
           <Card className="relative h-full flex flex-col justify-between hover:border-primary transition-all duration-300 hover:shadow-lg pt-8">

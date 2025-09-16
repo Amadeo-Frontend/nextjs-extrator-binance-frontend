@@ -1,8 +1,8 @@
-// frontend/app/extrator-forex-polygon/page.tsx (VERSÃO COM INPUT DE DATA SIMPLES)
+// frontend/app/extrator-forex-polygon/page.tsx (VERSÃO FINAL CORRIGIDA)
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Importa useEffect
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 import ClipLoader from "react-spinners/ClipLoader";
@@ -12,76 +12,54 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const POLYGON_INTERVALS = ["1m", "5m", "15m", "30m", "1h", "D"];
 
 export default function ExtratorForexPolygonPage() {
-  const [assets, setAssets] = useState('EURUSD,GBPUSD');
-  const [intervals, setIntervals] = useState('1h,D');
-  // Estados de data como strings
-  const [startDate, setStartDate] = useState<string>('2024-01-01');
-  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [symbols, setSymbols] = useState('EURUSD,GBPUSD');
+  const [interval, setInterval] = useState('1h');
+  // Inicia as datas como strings vazias
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Define os valores iniciais das datas apenas no lado do cliente
+  useEffect(() => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    setStartDate(yesterday.toISOString().split('T')[0]);
+    setEndDate(today.toISOString().split('T')[0]);
+  }, []);
+
   const handleDownload = async () => {
-    const assetList = assets.split(',').map(a => a.trim().toUpperCase()).filter(a => a);
-    const intervalList = intervals.split(',').map(i => i.trim()).filter(i => i);
-
-    if (assetList.length === 0 || intervalList.length === 0 || !startDate || !endDate) {
-      toast.error('Por favor, preencha todos os campos corretamente.');
+    // ... (lógica da função continua a mesma)
+    const symbolList = symbols.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
+    if (symbolList.length === 0 || !interval || !startDate || !endDate) {
+      toast.error("Campos obrigatórios", { description: "Por favor, preencha todos os campos." });
       return;
     }
-    if (startDate > endDate) {
-      toast.error("Período inválido", {
-        description: "A data de início não pode ser posterior à data de fim.",
-      });
-      return;
-    }
-
     setIsLoading(true);
-
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/polygon/download-data/`;
-      
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assets: assetList,
-          intervals: intervalList,
-          start_date: startDate,
-          end_date: endDate,
-        }),
+        body: JSON.stringify({ assets: symbolList, intervals: [interval], start_date: startDate, end_date: endDate }),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Ocorreu um erro ao buscar os dados.');
+        throw new Error(errorData.detail || 'Ocorreu um erro ao iniciar a extração.');
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      
-      const contentDisposition = response.headers.get('content-disposition');
-      let filename = 'dados_polygon_forex.zip';
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (filenameMatch?.[1]) filename = filenameMatch[1];
-      }
-      
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Download iniciado!", {
-        description: "Seu arquivo ZIP com os dados de Forex está sendo baixado.",
+      toast.success("Extração Iniciada!", {
+        description: `A extração da Polygon.io começou. Verifique a Central de Relatórios em breve.`,
+        action: { label: "Ver Relatórios", onClick: () => window.location.href = '/relatorios' },
       });
-
     } catch (err: unknown) {
       if (err instanceof Error) {
-        toast.error("Erro ao buscar dados", { description: err.message });
+        toast.error("Erro ao Iniciar", { description: err.message });
       } else {
         toast.error("Erro Desconhecido", { description: "Ocorreu um problema inesperado." });
       }
@@ -94,44 +72,38 @@ export default function ExtratorForexPolygonPage() {
     <main className="bg-background min-h-screen flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Extrator de Dados de Forex (Polygon.io)</CardTitle>
-          <CardDescription>Baixe dados históricos para pares de moedas. Use o formato de 6 letras (EURUSD). <span className="font-bold text-destructive block">Atenção: O plano gratuito tem um limite de 5 chamadas por minuto.</span></CardDescription>
+          <CardTitle className="text-2xl">Extrator de Dados (Polygon.io)</CardTitle>
+          <CardDescription>Inicia a geração de um arquivo .zip com dados de Forex da Polygon.io.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="assets">Pares de Moedas (separados por vírgula)</Label>
-            <Input id="assets" value={assets} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssets(e.target.value)} placeholder="Ex: EURUSD,GBPUSD,USDJPY" />
+            <Label htmlFor="symbols">Símbolos (separados por vírgula)</Label>
+            <Input id="symbols" value={symbols} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSymbols(e.target.value)} placeholder="Ex: EURUSD,USDBRL" />
           </div>
-          
           <div className="space-y-2">
-            <Label htmlFor="intervals">Timeframes (separados por vírgula)</Label>
-            <Input id="intervals" value={intervals} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIntervals(e.target.value)} placeholder="Ex: 5m, 1h, D" />
-            <p className="text-xs text-muted-foreground">Suportados: 1m, 5m, 15m, 30m, 1h, D</p>
+            <Label htmlFor="interval">Timeframe</Label>
+            <Select value={interval} onValueChange={setInterval}>
+              <SelectTrigger><SelectValue placeholder="Selecione o timeframe" /></SelectTrigger>
+              <SelectContent>
+                {POLYGON_INTERVALS.map(iv => <SelectItem key={iv} value={iv}>{iv}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
-          
-          {/* --- INPUT DE DATA SIMPLES APLICADO AQUI --- */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Data de Início</Label>
-              <Input id="start-date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              <Input id="start-date" type="date" value={startDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="end-date">Data de Fim</Label>
-              <Input id="end-date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <Input id="end-date" type="date" value={endDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)} />
             </div>
           </div>
-
           <Button onClick={handleDownload} disabled={isLoading} className="w-full">
             {isLoading ? (
-              <>
-                <ClipLoader color={"hsl(var(--primary-foreground))"} size={20} className="mr-2" />
-                Gerando...
-              </>
+              <><ClipLoader color={"hsl(var(--primary-foreground))"} size={20} className="mr-2" />Iniciando...</>
             ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                Gerar e Baixar Arquivos
-              </>
+              <><Download className="mr-2 h-4 w-4" />Iniciar Geração de Arquivo</>
             )}
           </Button>
         </CardContent>
