@@ -1,34 +1,11 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { withAuth } from "next-auth/middleware";
 
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  // rotas liberadas
-  if (
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/_next")
-  ) {
-    return NextResponse.next();
-  }
-
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  // se não estiver logado → login
-  if (!token) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  return NextResponse.next();
-}
+export default withAuth({
+  pages: {
+    signIn: "/login",
+  },
+});
 
 export const config = {
-  matcher: ["/((?!favicon.ico).*)"],
+  matcher: ["/dashboard/:path*"],
 };
