@@ -1,10 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthOptions } from "next-auth";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:8000";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
@@ -25,17 +24,12 @@ const authOptions: NextAuthOptions = {
         const res = await fetch(`${BACKEND_API_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
-          }),
+          body: JSON.stringify(credentials),
         });
 
         if (!res.ok) return null;
 
         const data = await res.json();
-
-        if (!data?.access_token || !data?.user) return null;
 
         return {
           id: String(data.user.id),
